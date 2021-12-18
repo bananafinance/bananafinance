@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 
-interface IBEP20 {
+interface IERC20 {
   /**
    * @dev Returns the amount of tokens in existence.
    */
@@ -29,7 +29,7 @@ interface IBEP20 {
   function name() external view returns (string memory);
 
   /**
-   * @dev Returns the bep token owner.
+   * @dev Returns the erc token owner.
    */
   function getOwner() external view returns (address);
 
@@ -98,12 +98,12 @@ interface IBEP20 {
   event Approval(address indexed owner, address indexed spender, uint256 value);
 }
 
-library SafeBEP20 {
+library SafeERC20 {
     using SafeMath for uint256;
     using Address for address;
 
     function safeTransfer(
-        IBEP20 token,
+        IERC20 token,
         address to,
         uint256 value
     ) internal {
@@ -111,7 +111,7 @@ library SafeBEP20 {
     }
 
     function safeTransferFrom(
-        IBEP20 token,
+        IERC20 token,
         address from,
         address to,
         uint256 value
@@ -121,13 +121,13 @@ library SafeBEP20 {
 
     /**
      * @dev Deprecated. This function has issues similar to the ones found in
-     * {IBEP20-approve}, and its usage is discouraged.
+     * {IERC20-approve}, and its usage is discouraged.
      *
      * Whenever possible, use {safeIncreaseAllowance} and
      * {safeDecreaseAllowance} instead.
      */
     function safeApprove(
-        IBEP20 token,
+        IERC20 token,
         address spender,
         uint256 value
     ) internal {
@@ -137,13 +137,13 @@ library SafeBEP20 {
         // solhint-disable-next-line max-line-length
         require(
             (value == 0) || (token.allowance(address(this), spender) == 0),
-            'SafeBEP20: approve from non-zero to non-zero allowance'
+            'SafeERC20: approve from non-zero to non-zero allowance'
         );
         _callOptionalReturn(token, abi.encodeWithSelector(token.approve.selector, spender, value));
     }
 
     function safeIncreaseAllowance(
-        IBEP20 token,
+        IERC20 token,
         address spender,
         uint256 value
     ) internal {
@@ -152,13 +152,13 @@ library SafeBEP20 {
     }
 
     function safeDecreaseAllowance(
-        IBEP20 token,
+        IERC20 token,
         address spender,
         uint256 value
     ) internal {
         uint256 newAllowance = token.allowance(address(this), spender).sub(
             value,
-            'SafeBEP20: decreased allowance below zero'
+            'SafeERC20: decreased allowance below zero'
         );
         _callOptionalReturn(token, abi.encodeWithSelector(token.approve.selector, spender, newAllowance));
     }
@@ -169,23 +169,23 @@ library SafeBEP20 {
      * @param token The token targeted by the call.
      * @param data The call data (encoded using abi.encode or one of its variants).
      */
-    function _callOptionalReturn(IBEP20 token, bytes memory data) private {
+    function _callOptionalReturn(IERC20 token, bytes memory data) private {
         // We need to perform a low level call here, to bypass Solidity's return data size checking mechanism, since
         // we're implementing it ourselves. We use {Address.functionCall} to perform this call, which verifies that
         // the target address contains contract code and also asserts for success in the low-level call.
 
-        bytes memory returndata = address(token).functionCall(data, 'SafeBEP20: low-level call failed');
+        bytes memory returndata = address(token).functionCall(data, 'SafeERC20: low-level call failed');
         if (returndata.length > 0) {
             // Return data is optional
             // solhint-disable-next-line max-line-length
-            require(abi.decode(returndata, (bool)), 'SafeBEP20: BEP20 operation did not succeed');
+            require(abi.decode(returndata, (bool)), 'SafeERC20: ERC20 operation did not succeed');
         }
     }
 }
 
 contract BananaPool is Ownable, ReentrancyGuard {
     using SafeMath for uint256;
-    using SafeBEP20 for IBEP20;
+    using SafeERC20 for IERC20;
 
     // The address of the smart chef factory
     address public SMART_CHEF_FACTORY;
@@ -194,7 +194,7 @@ contract BananaPool is Ownable, ReentrancyGuard {
     address public feeAddress;
     
     // Dev wallet address for signature
-    address public devAddress = 0x2e7A5020D782B4690b34dd71C3Df0789b0E5386F;
+    address constant devAddress = 0x2e7A5020D782B4690b34dd71C3Df0789b0E5386F;
 
     // Whether a limit is set for users
     bool public hasUserLimit;
@@ -228,13 +228,13 @@ contract BananaPool is Ownable, ReentrancyGuard {
     
     // The reward array
     mapping(uint256 => uint256) public rewardPerMonth;
-    uint256 public blocksPerMonth = 199380;
+    uint256 constant blocksPerMonth = 199380;
 
     // The reward token
-    IBEP20 public rewardToken;
+    IERC20 public rewardToken;
 
     // The staked token
-    IBEP20 public stakedToken;
+    IERC20 public stakedToken;
     
 
     // Info of each user that stakes tokens (stakedToken)
@@ -254,6 +254,10 @@ contract BananaPool is Ownable, ReentrancyGuard {
     event NewPoolLimit(uint256 poolLimitPerUser);
     event RewardsStop(uint256 blockNumber);
     event Withdraw(address indexed user, uint256 amount);
+    event Initialize(IERC20 _stakedToken, IERC20 _rewardToken, uint256 _rewardPerBlock, 
+        uint256 _startBlock, uint256 _bonusEndBlock, uint256 _poolLimitPerUser, address _admin, uint256 _lockStakeDate,
+        uint256 _lockWithdrawDate, address _feeAddress);
+    event StopReward();
 
     constructor() {
         SMART_CHEF_FACTORY = msg.sender;
@@ -270,8 +274,8 @@ contract BananaPool is Ownable, ReentrancyGuard {
      * @param _admin: admin address with ownership
      */
     function initialize(
-        IBEP20 _stakedToken,
-        IBEP20 _rewardToken,
+        IERC20 _stakedToken,
+        IERC20 _rewardToken,
         uint256 _rewardPerBlock,
         uint256 _startBlock,
         uint256 _bonusEndBlock,
@@ -283,6 +287,8 @@ contract BananaPool is Ownable, ReentrancyGuard {
     ) external {
         require(!isInitialized, 'Already initialized');
         require(msg.sender == SMART_CHEF_FACTORY, 'Not factory');
+        require(_feeAddress != address(0), "_feeAddress: fee address is zero address");
+        require(_admin != address(0), "_admin: admin address is zero address");
 
         // Make this contract initialized
         isInitialized = true;
@@ -326,6 +332,9 @@ contract BananaPool is Ownable, ReentrancyGuard {
 
         // Transfer ownership to the admin address who becomes owner of the contract
         transferOwnership(_admin);
+
+        emit Initialize(_stakedToken, _rewardToken, _rewardPerBlock, _startBlock, _bonusEndBlock, _poolLimitPerUser,
+            _admin, _lockStakeDate, _lockWithdrawDate, _feeAddress);
     }
 
     /*
@@ -418,6 +427,7 @@ contract BananaPool is Ownable, ReentrancyGuard {
      */
     function emergencyRewardWithdraw(uint256 _amount) external onlyOwner {
         rewardToken.safeTransfer(address(msg.sender), _amount);
+        emit EmergencyWithdraw(msg.sender, _amount);
     }
 
     /**
@@ -430,7 +440,7 @@ contract BananaPool is Ownable, ReentrancyGuard {
         require(_tokenAddress != address(stakedToken), 'Cannot be staked token');
         require(_tokenAddress != address(rewardToken), 'Cannot be reward token');
 
-        IBEP20(_tokenAddress).safeTransfer(address(msg.sender), _tokenAmount);
+        IERC20(_tokenAddress).safeTransfer(address(msg.sender), _tokenAmount);
 
         emit AdminTokenRecovery(_tokenAddress, _tokenAmount);
     }
@@ -441,6 +451,7 @@ contract BananaPool is Ownable, ReentrancyGuard {
      */
     function stopReward() external onlyOwner {
         bonusEndBlock = block.number;
+        emit StopReward();
     }
 
     /*
@@ -450,7 +461,6 @@ contract BananaPool is Ownable, ReentrancyGuard {
      * @param _poolLimitPerUser: new pool limit per user
      */
     function updatePoolLimitPerUser(bool _hasUserLimit, uint256 _poolLimitPerUser) external onlyOwner {
-        require(hasUserLimit, 'Must be set');
         if (_hasUserLimit) {
             require(_poolLimitPerUser > poolLimitPerUser, 'New limit must be higher');
             poolLimitPerUser = _poolLimitPerUser;
@@ -501,7 +511,6 @@ contract BananaPool is Ownable, ReentrancyGuard {
         UserInfo storage user = userInfo[_user];
         uint256 stakedTokenSupply = stakedToken.balanceOf(address(this));
         if (block.number > lastRewardBlock && stakedTokenSupply != 0) {
-            // uint256 multiplier = _getMultiplier(lastRewardBlock, block.number);
             uint256 cakeReward = _getRewardBNN(lastRewardBlock, block.number);
             uint256 adjustedTokenPerShare = accTokenPerShare.add(
                 cakeReward.mul(PRECISION_FACTOR).div(stakedTokenSupply)
@@ -522,30 +531,12 @@ contract BananaPool is Ownable, ReentrancyGuard {
 
         uint256 stakedTokenSupply = stakedToken.balanceOf(address(this));
 
-        if (stakedTokenSupply == 0) {
-            lastRewardBlock = block.number;
-            return;
+        if (stakedTokenSupply > 0) {
+            uint256 cakeReward = _getRewardBNN(lastRewardBlock, block.number);
+            accTokenPerShare = accTokenPerShare.add(cakeReward.mul(PRECISION_FACTOR).div(stakedTokenSupply));
         }
 
-        // uint256 multiplier = _getMultiplier(lastRewardBlock, block.number);
-        uint256 cakeReward = _getRewardBNN(lastRewardBlock, block.number);
-        accTokenPerShare = accTokenPerShare.add(cakeReward.mul(PRECISION_FACTOR).div(stakedTokenSupply));
         lastRewardBlock = block.number;
-    }
-
-    /*
-     * @notice Return reward multiplier over the given _from to _to block.
-     * @param _from: block to start
-     * @param _to: block to finish
-     */
-    function _getMultiplier(uint256 _from, uint256 _to) internal view returns (uint256) {
-        if (_to <= bonusEndBlock) {
-            return _to.sub(_from);
-        } else if (_from >= bonusEndBlock) {
-            return 0;
-        } else {
-            return bonusEndBlock.sub(_from);
-        }
     }
     
     function getLockStakeDate() external view returns (uint256) {
@@ -557,6 +548,12 @@ contract BananaPool is Ownable, ReentrancyGuard {
         return user.withdrawDate + lockWithdrawDate;
     }
     
+    /*
+     * @notice View function to get bnn reward on frontend.
+     * @param _from: from address
+     * @param _to: to address
+     * @return bnn reward
+     */
     function _getRewardBNN(uint256 _from, uint256 _to) internal view returns (uint256) {
         if (_to <= bonusEndBlock) {
             uint256 fromMonth = (_from - startBlock) / blocksPerMonth;
