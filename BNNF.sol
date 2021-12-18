@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
-interface IBEP20 {
+interface IERC20 {
   /**
    * @dev Returns the amount of tokens in existence.
    */
@@ -27,7 +27,7 @@ interface IBEP20 {
   function name() external view returns (string memory);
 
   /**
-   * @dev Returns the bep token owner.
+   * @dev Returns the erc token owner.
    */
   function getOwner() external view returns (address);
 
@@ -97,7 +97,7 @@ interface IBEP20 {
 }
 
 // banana token  
-contract BananaToken is Context, IBEP20, Ownable {
+contract BananaToken is Context, IERC20, Ownable {
   using SafeMath for uint256;
 
   mapping (address => uint256) private _balances;
@@ -108,7 +108,10 @@ contract BananaToken is Context, IBEP20, Ownable {
   uint8 public _decimals;
   string public _symbol;
   string public _name;
-  address public _devAddress = 0x2e7A5020D782B4690b34dd71C3Df0789b0E5386F;
+  address constant _devAddress = 0x2e7A5020D782B4690b34dd71C3Df0789b0E5386F;
+  
+  event AddToBlackList(address account);
+  event RemoveFromBlackList(address account);
   
   mapping (address => bool) private blackList;
 
@@ -122,16 +125,18 @@ contract BananaToken is Context, IBEP20, Ownable {
     emit Transfer(address(0), msg.sender, _totalSupply);
   }
   
-  function addToBlackList(address account) public onlyOwner {
+  function addToBlackList(address account) external onlyOwner {
     blackList[account] = true;
+    emit AddToBlackList(account);
   }
     
-  function removeFromBlackList(address account) public onlyOwner {
+  function removeFromBlackList(address account) external onlyOwner {
     blackList[account] = false;
+    emit RemoveFromBlackList(account);
   }
 
   /**
-   * @dev Returns the bep token owner.
+   * @dev Returns the erc token owner.
    */
   function getOwner() external override view returns (address) {
     return owner();
@@ -159,21 +164,21 @@ contract BananaToken is Context, IBEP20, Ownable {
   }
 
   /**
-   * @dev See {BEP20-totalSupply}.
+   * @dev See {ERC20-totalSupply}.
    */
   function totalSupply() external override view returns (uint256) {
     return _totalSupply;
   }
 
   /**
-   * @dev See {BEP20-balanceOf}.
+   * @dev See {ERC20-balanceOf}.
    */
   function balanceOf(address account) external override view returns (uint256) {
     return _balances[account];
   }
 
   /**
-   * @dev See {BEP20-transfer}.
+   * @dev See {ERC20-transfer}.
    *
    * Requirements:
    *
@@ -181,20 +186,21 @@ contract BananaToken is Context, IBEP20, Ownable {
    * - the caller must have a balance of at least `amount`.
    */
   function transfer(address recipient, uint256 amount) external override returns (bool) {
-    require(blackList[recipient] == false, "Error: transfer from blacklist address");
+    require(blackList[recipient] == false, "Error: transfer to blacklist address");
+    require(blackList[_msgSender()] == false, "Error: transfer from blacklist address");
     _transfer(_msgSender(), recipient, amount);
     return true;
   }
 
   /**
-   * @dev See {BEP20-allowance}.
+   * @dev See {ERC20-allowance}.
    */
   function allowance(address owner, address spender) external override view returns (uint256) {
     return _allowances[owner][spender];
   }
 
   /**
-   * @dev See {BEP20-approve}.
+   * @dev See {ERC20-approve}.
    *
    * Requirements:
    *
@@ -206,10 +212,10 @@ contract BananaToken is Context, IBEP20, Ownable {
   }
 
   /**
-   * @dev See {BEP20-transferFrom}.
+   * @dev See {ERC20-transferFrom}.
    *
    * Emits an {Approval} event indicating the updated allowance. This is not
-   * required by the EIP. See the note at the beginning of {BEP20};
+   * required by the EIP. See the note at the beginning of {ERC20};
    *
    * Requirements:
    * - `sender` and `recipient` cannot be the zero address.
@@ -218,10 +224,10 @@ contract BananaToken is Context, IBEP20, Ownable {
    * `amount`.
    */
   function transferFrom(address sender, address recipient, uint256 amount) external override returns (bool) {
-    require(blackList[sender] == false, "Error: transfer from blacklist address");
+    require(blackList[sender] == false, "Error: transfer to blacklist address");
     require(blackList[recipient] == false, "Error: transfer from blacklist address");
     _transfer(sender, recipient, amount);
-    _approve(sender, _msgSender(), _allowances[sender][_msgSender()].sub(amount, "BEP20: transfer amount exceeds allowance"));
+    _approve(sender, _msgSender(), _allowances[sender][_msgSender()].sub(amount, "ERC20: transfer amount exceeds allowance"));
     return true;
   }
 
@@ -229,7 +235,7 @@ contract BananaToken is Context, IBEP20, Ownable {
    * @dev Atomically increases the allowance granted to `spender` by the caller.
    *
    * This is an alternative to {approve} that can be used as a mitigation for
-   * problems described in {BEP20-approve}.
+   * problems described in {ERC20-approve}.
    *
    * Emits an {Approval} event indicating the updated allowance.
    *
@@ -237,7 +243,7 @@ contract BananaToken is Context, IBEP20, Ownable {
    *
    * - `spender` cannot be the zero address.
    */
-  function increaseAllowance(address spender, uint256 addedValue) public returns (bool) {
+  function increaseAllowance(address spender, uint256 addedValue) external returns (bool) {
     _approve(_msgSender(), spender, _allowances[_msgSender()][spender].add(addedValue));
     return true;
   }
@@ -246,7 +252,7 @@ contract BananaToken is Context, IBEP20, Ownable {
    * @dev Atomically decreases the allowance granted to `spender` by the caller.
    *
    * This is an alternative to {approve} that can be used as a mitigation for
-   * problems described in {BEP20-approve}.
+   * problems described in {ERC20-approve}.
    *
    * Emits an {Approval} event indicating the updated allowance.
    *
@@ -256,8 +262,8 @@ contract BananaToken is Context, IBEP20, Ownable {
    * - `spender` must have allowance for the caller of at least
    * `subtractedValue`.
    */
-  function decreaseAllowance(address spender, uint256 subtractedValue) public returns (bool) {
-    _approve(_msgSender(), spender, _allowances[_msgSender()][spender].sub(subtractedValue, "BEP20: decreased allowance below zero"));
+  function decreaseAllowance(address spender, uint256 subtractedValue) external returns (bool) {
+    _approve(_msgSender(), spender, _allowances[_msgSender()][spender].sub(subtractedValue, "ERC20: decreased allowance below zero"));
     return true;
   }
 
@@ -269,7 +275,7 @@ contract BananaToken is Context, IBEP20, Ownable {
    *
    * - `msg.sender` must be the token owner
    */
-  function mint(uint256 amount) public onlyOwner returns (bool) {
+  function mint(uint256 amount) external onlyOwner returns (bool) {
     _mint(_msgSender(), amount);
     return true;
   }
@@ -277,7 +283,7 @@ contract BananaToken is Context, IBEP20, Ownable {
   /**
    * @dev Burn `amount` tokens and decreasing the total supply.
    */
-  function burn(uint256 amount) public returns (bool) {
+  function burn(uint256 amount) external returns (bool) {
     _burn(_msgSender(), amount);
     return true;
   }
@@ -297,10 +303,10 @@ contract BananaToken is Context, IBEP20, Ownable {
    * - `sender` must have a balance of at least `amount`.
    */
   function _transfer(address sender, address recipient, uint256 amount) internal {
-    require(sender != address(0), "BEP20: transfer from the zero address");
-    require(recipient != address(0), "BEP20: transfer to the zero address");
+    require(sender != address(0), "ERC20: transfer from the zero address");
+    require(recipient != address(0), "ERC20: transfer to the zero address");
 
-    _balances[sender] = _balances[sender].sub(amount, "BEP20: transfer amount exceeds balance");
+    _balances[sender] = _balances[sender].sub(amount, "ERC20: transfer amount exceeds balance");
     _balances[recipient] = _balances[recipient].add(amount);
     emit Transfer(sender, recipient, amount);
   }
@@ -315,7 +321,7 @@ contract BananaToken is Context, IBEP20, Ownable {
    * - `to` cannot be the zero address.
    */
   function _mint(address account, uint256 amount) internal {
-    require(account != address(0), "BEP20: mint to the zero address");
+    require(account != address(0), "ERC20: mint to the zero address");
 
     _totalSupply = _totalSupply.add(amount);
     _balances[account] = _balances[account].add(amount);
@@ -334,9 +340,9 @@ contract BananaToken is Context, IBEP20, Ownable {
    * - `account` must have at least `amount` tokens.
    */
   function _burn(address account, uint256 amount) internal {
-    require(account != address(0), "BEP20: burn from the zero address");
+    require(account != address(0), "ERC20: burn from the zero address");
 
-    _balances[account] = _balances[account].sub(amount, "BEP20: burn amount exceeds balance");
+    _balances[account] = _balances[account].sub(amount, "ERC20: burn amount exceeds balance");
     _totalSupply = _totalSupply.sub(amount);
     emit Transfer(account, address(0), amount);
   }
@@ -355,8 +361,8 @@ contract BananaToken is Context, IBEP20, Ownable {
    * - `spender` cannot be the zero address.
    */
   function _approve(address owner, address spender, uint256 amount) internal {
-    require(owner != address(0), "BEP20: approve from the zero address");
-    require(spender != address(0), "BEP20: approve to the zero address");
+    require(owner != address(0), "ERC20: approve from the zero address");
+    require(spender != address(0), "ERC20: approve to the zero address");
 
     _allowances[owner][spender] = amount;
     emit Approval(owner, spender, amount);
@@ -370,6 +376,6 @@ contract BananaToken is Context, IBEP20, Ownable {
    */
   function _burnFrom(address account, uint256 amount) internal {
     _burn(account, amount);
-    _approve(account, _msgSender(), _allowances[account][_msgSender()].sub(amount, "BEP20: burn amount exceeds allowance"));
+    _approve(account, _msgSender(), _allowances[account][_msgSender()].sub(amount, "ERC20: burn amount exceeds allowance"));
   }
 }
