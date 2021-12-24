@@ -119,7 +119,7 @@ contract BananaToken is Context, IERC20, Ownable {
     _name = "Banana Token";
     _symbol = "BNNF";
     _decimals = 18;
-    _totalSupply = 108000000000000000000000000;
+    _totalSupply = 1 ether * 108000000;
     _balances[msg.sender] = _totalSupply;
 
     emit Transfer(address(0), msg.sender, _totalSupply);
