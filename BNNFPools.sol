@@ -205,10 +205,10 @@ contract BananaPool is Ownable, ReentrancyGuard {
     // Accrued token per share
     uint256 public accTokenPerShare;
 
-    // The block number when CAKE mining ends.
+    // The block number when BNNF mining ends.
     uint256 public bonusEndBlock;
 
-    // The block number when CAKE mining starts.
+    // The block number when BNNF mining starts.
     uint256 public startBlock;
 
     // The block number of the last pool update
@@ -217,7 +217,7 @@ contract BananaPool is Ownable, ReentrancyGuard {
     // The pool limit (0 if none)
     uint256 public poolLimitPerUser;
 
-    // CAKE tokens created per block.
+    // BNNF tokens created per block.
     uint256 public rewardPerBlock;
 
     // The precision factor
@@ -511,9 +511,9 @@ contract BananaPool is Ownable, ReentrancyGuard {
         UserInfo storage user = userInfo[_user];
         uint256 stakedTokenSupply = stakedToken.balanceOf(address(this));
         if (block.number > lastRewardBlock && stakedTokenSupply != 0) {
-            uint256 cakeReward = _getRewardBNN(lastRewardBlock, block.number);
+            uint256 bnnfReward = _getRewardBNN(lastRewardBlock, block.number);
             uint256 adjustedTokenPerShare = accTokenPerShare.add(
-                cakeReward.mul(PRECISION_FACTOR).div(stakedTokenSupply)
+                bnnfReward.mul(PRECISION_FACTOR).div(stakedTokenSupply)
             );
             return user.amount.mul(adjustedTokenPerShare).div(PRECISION_FACTOR).sub(user.rewardDebt);
         } else {
@@ -532,8 +532,8 @@ contract BananaPool is Ownable, ReentrancyGuard {
         uint256 stakedTokenSupply = stakedToken.balanceOf(address(this));
 
         if (stakedTokenSupply > 0) {
-            uint256 cakeReward = _getRewardBNN(lastRewardBlock, block.number);
-            accTokenPerShare = accTokenPerShare.add(cakeReward.mul(PRECISION_FACTOR).div(stakedTokenSupply));
+            uint256 bnnfReward = _getRewardBNN(lastRewardBlock, block.number);
+            accTokenPerShare = accTokenPerShare.add(bnnfReward.mul(PRECISION_FACTOR).div(stakedTokenSupply));
         }
 
         lastRewardBlock = block.number;
