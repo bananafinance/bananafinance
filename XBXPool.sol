@@ -1,3 +1,9 @@
+/**
+ *Submitted for verification at BscScan.com on 2021-05-05
+ */
+
+// File: @openzeppelin/contracts/utils/Context.sol
+
 // SPDX-License-Identifier: MIT
 
 pragma solidity 0.8.0;
@@ -8,96 +14,110 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 
 interface IERC20 {
-  /**
-   * @dev Returns the amount of tokens in existence.
-   */
-  function totalSupply() external view returns (uint256);
+    /**
+     * @dev Returns the amount of tokens in existence.
+     */
+    function totalSupply() external view returns (uint256);
 
-  /**
-   * @dev Returns the token decimals.
-   */
-  function decimals() external view returns (uint8);
+    /**
+     * @dev Returns the token decimals.
+     */
+    function decimals() external view returns (uint8);
 
-  /**
-   * @dev Returns the token symbol.
-   */
-  function symbol() external view returns (string memory);
+    /**
+     * @dev Returns the token symbol.
+     */
+    function symbol() external view returns (string memory);
 
-  /**
-  * @dev Returns the token name.
-  */
-  function name() external view returns (string memory);
+    /**
+     * @dev Returns the token name.
+     */
+    function name() external view returns (string memory);
 
-  /**
-   * @dev Returns the erc token owner.
-   */
-  function getOwner() external view returns (address);
+    /**
+     * @dev Returns the erc token owner.
+     */
+    function getOwner() external view returns (address);
 
-  /**
-   * @dev Returns the amount of tokens owned by `account`.
-   */
-  function balanceOf(address account) external view returns (uint256);
+    /**
+     * @dev Returns the amount of tokens owned by `account`.
+     */
+    function balanceOf(address account) external view returns (uint256);
 
-  /**
-   * @dev Moves `amount` tokens from the caller's account to `recipient`.
-   *
-   * Returns a boolean value indicating whether the operation succeeded.
-   *
-   * Emits a {Transfer} event.
-   */
-  function transfer(address recipient, uint256 amount) external returns (bool);
+    /**
+     * @dev Moves `amount` tokens from the caller's account to `recipient`.
+     *
+     * Returns a boolean value indicating whether the operation succeeded.
+     *
+     * Emits a {Transfer} event.
+     */
+    function transfer(address recipient, uint256 amount) external returns (bool);
 
-  /**
-   * @dev Returns the remaining number of tokens that `spender` will be
-   * allowed to spend on behalf of `owner` through {transferFrom}. This is
-   * zero by default.
-   *
-   * This value changes when {approve} or {transferFrom} are called.
-   */
-  function allowance(address _owner, address spender) external view returns (uint256);
+    /**
+     * @dev Returns the remaining number of tokens that `spender` will be
+     * allowed to spend on behalf of `owner` through {transferFrom}. This is
+     * zero by default.
+     *
+     * This value changes when {approve} or {transferFrom} are called.
+     */
+    function allowance(address _owner, address spender) external view returns (uint256);
 
-  /**
-   * @dev Sets `amount` as the allowance of `spender` over the caller's tokens.
-   *
-   * Returns a boolean value indicating whether the operation succeeded.
-   *
-   * IMPORTANT: Beware that changing an allowance with this method brings the risk
-   * that someone may use both the old and the new allowance by unfortunate
-   * transaction ordering. One possible solution to mitigate this race
-   * condition is to first reduce the spender's allowance to 0 and set the
-   * desired value afterwards:
-   * https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
-   *
-   * Emits an {Approval} event.
-   */
-  function approve(address spender, uint256 amount) external returns (bool);
+    /**
+     * @dev Sets `amount` as the allowance of `spender` over the caller's tokens.
+     *
+     * Returns a boolean value indicating whether the operation succeeded.
+     *
+     * IMPORTANT: Beware that changing an allowance with this method brings the risk
+     * that someone may use both the old and the new allowance by unfortunate
+     * transaction ordering. One possible solution to mitigate this race
+     * condition is to first reduce the spender's allowance to 0 and set the
+     * desired value afterwards:
+     * https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
+     *
+     * Emits an {Approval} event.
+     */
+    function approve(address spender, uint256 amount) external returns (bool);
 
-  /**
-   * @dev Moves `amount` tokens from `sender` to `recipient` using the
-   * allowance mechanism. `amount` is then deducted from the caller's
-   * allowance.
-   *
-   * Returns a boolean value indicating whether the operation succeeded.
-   *
-   * Emits a {Transfer} event.
-   */
-  function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
+    /**
+     * @dev Moves `amount` tokens from `sender` to `recipient` using the
+     * allowance mechanism. `amount` is then deducted from the caller's
+     * allowance.
+     *
+     * Returns a boolean value indicating whether the operation succeeded.
+     *
+     * Emits a {Transfer} event.
+     */
+    function transferFrom(
+        address sender,
+        address recipient,
+        uint256 amount
+    ) external returns (bool);
 
-  /**
-   * @dev Emitted when `value` tokens are moved from one account (`from`) to
-   * another (`to`).
-   *
-   * Note that `value` may be zero.
-   */
-  event Transfer(address indexed from, address indexed to, uint256 value);
+    /**
+     * @dev Emitted when `value` tokens are moved from one account (`from`) to
+     * another (`to`).
+     *
+     * Note that `value` may be zero.
+     */
+    event Transfer(address indexed from, address indexed to, uint256 value);
 
-  /**
-   * @dev Emitted when the allowance of a `spender` for an `owner` is set by
-   * a call to {approve}. `value` is the new allowance.
-   */
-  event Approval(address indexed owner, address indexed spender, uint256 value);
+    /**
+     * @dev Emitted when the allowance of a `spender` for an `owner` is set by
+     * a call to {approve}. `value` is the new allowance.
+     */
+    event Approval(address indexed owner, address indexed spender, uint256 value);
 }
 
+
+/**
+ * @title SafeERC20
+ * @dev Wrappers around ERC20 operations that throw on failure (when the token
+ * contract returns false). Tokens that return no value (and instead revert or
+ * throw on failure) are also supported, non-reverting calls are assumed to be
+ * successful.
+ * To use this library you can add a `using SafeERC20 for IERC20;` statement to your contract,
+ * which allows you to call the safe operations as `token.safeTransfer(...)`, etc.
+ */
 library SafeERC20 {
     using SafeMath for uint256;
     using Address for address;
@@ -190,11 +210,7 @@ contract BananaPool is Ownable, ReentrancyGuard {
     // The address of the smart chef factory
     address public SMART_CHEF_FACTORY;
     
-    // Platform fee wallet
     address public feeAddress;
-    
-    // Dev wallet address for signature
-    address constant devAddress = 0x2e7A5020D782B4690b34dd71C3Df0789b0E5386F;
 
     // Whether a limit is set for users
     bool public hasUserLimit;
@@ -205,10 +221,10 @@ contract BananaPool is Ownable, ReentrancyGuard {
     // Accrued token per share
     uint256 public accTokenPerShare;
 
-    // The block number when BNNF mining ends.
+    // The block number when XBX mining ends.
     uint256 public bonusEndBlock;
 
-    // The block number when BNNF mining starts.
+    // The block number when XBX mining starts.
     uint256 public startBlock;
 
     // The block number of the last pool update
@@ -217,7 +233,7 @@ contract BananaPool is Ownable, ReentrancyGuard {
     // The pool limit (0 if none)
     uint256 public poolLimitPerUser;
 
-    // BNNF tokens created per block.
+    // XBX tokens created per block.
     uint256 public rewardPerBlock;
 
     // The precision factor
@@ -225,17 +241,12 @@ contract BananaPool is Ownable, ReentrancyGuard {
     
     uint256 public lockStakeDate;
     uint256 public lockWithdrawDate;
-    
-    // The reward array
-    mapping(uint256 => uint256) public rewardPerMonth;
-    uint256 constant blocksPerMonth = 199380;
 
     // The reward token
     IERC20 public rewardToken;
 
     // The staked token
     IERC20 public stakedToken;
-    
 
     // Info of each user that stakes tokens (stakedToken)
     mapping(address => UserInfo) public userInfo;
@@ -243,7 +254,6 @@ contract BananaPool is Ownable, ReentrancyGuard {
     struct UserInfo {
         uint256 amount; // How many staked tokens the user has provided
         uint256 rewardDebt; // Reward debt
-        uint256 withdrawDate; // withdrawDate
     }
 
     event AdminTokenRecovery(address tokenRecovered, uint256 amount);
@@ -302,20 +312,6 @@ contract BananaPool is Ownable, ReentrancyGuard {
         rewardPerBlock = _rewardPerBlock;
         startBlock = _startBlock;
         bonusEndBlock = _bonusEndBlock;
-        
-        // reward per block monthly
-        rewardPerMonth[0] = 945 * 10 ** 16;
-        rewardPerMonth[1] = 84 * 10 ** 17;
-        rewardPerMonth[2] = 69 * 10 ** 17;
-        rewardPerMonth[3] = 563 * 10 ** 16;
-        rewardPerMonth[4] = 36 * 10 ** 17;
-        rewardPerMonth[5] = 278 * 10 ** 16;
-        rewardPerMonth[6] = 18 * 10 ** 17;
-        rewardPerMonth[7] = 98 * 10 ** 16;
-        rewardPerMonth[8] = 98 * 10 ** 16;
-        rewardPerMonth[9] = 83 * 10 ** 16;
-        rewardPerMonth[10] = 83 * 10 ** 16;
-        rewardPerMonth[11] = 83 * 10 ** 16;
 
         if (_poolLimitPerUser > 0) {
             hasUserLimit = true;
@@ -366,8 +362,6 @@ contract BananaPool is Ownable, ReentrancyGuard {
         if (_amount > 0) {
             user.amount = user.amount.add(_amount);
             stakedToken.safeTransferFrom(address(msg.sender), address(this), _amount);
-            
-            user.withdrawDate = block.timestamp;
         }
 
         user.rewardDebt = user.amount.mul(accTokenPerShare).div(PRECISION_FACTOR);
@@ -382,7 +376,7 @@ contract BananaPool is Ownable, ReentrancyGuard {
     function withdraw(uint256 _amount) external nonReentrant {
         UserInfo storage user = userInfo[msg.sender];
         require(user.amount >= _amount, 'Amount to withdraw too high');
-        require(user.withdrawDate + lockWithdrawDate >= block.timestamp, 'BANANA: Withdraw was locked');
+        require(block.timestamp >= lockWithdrawDate, 'BANANA: Withdraw was locked');
 
         _updatePool();
 
@@ -400,7 +394,7 @@ contract BananaPool is Ownable, ReentrancyGuard {
         }
 
         user.rewardDebt = user.amount.mul(accTokenPerShare).div(PRECISION_FACTOR);
-        
+
         emit Withdraw(msg.sender, _amount);
     }
 
@@ -511,9 +505,10 @@ contract BananaPool is Ownable, ReentrancyGuard {
         UserInfo storage user = userInfo[_user];
         uint256 stakedTokenSupply = stakedToken.balanceOf(address(this));
         if (block.number > lastRewardBlock && stakedTokenSupply != 0) {
-            uint256 bnnfReward = _getRewardBNN(lastRewardBlock, block.number);
+            uint256 multiplier = _getMultiplier(lastRewardBlock, block.number);
+            uint256 xbxReward = multiplier.mul(rewardPerBlock);
             uint256 adjustedTokenPerShare = accTokenPerShare.add(
-                bnnfReward.mul(PRECISION_FACTOR).div(stakedTokenSupply)
+                xbxReward.mul(PRECISION_FACTOR).div(stakedTokenSupply)
             );
             return user.amount.mul(adjustedTokenPerShare).div(PRECISION_FACTOR).sub(user.rewardDebt);
         } else {
@@ -532,11 +527,27 @@ contract BananaPool is Ownable, ReentrancyGuard {
         uint256 stakedTokenSupply = stakedToken.balanceOf(address(this));
 
         if (stakedTokenSupply > 0) {
-            uint256 bnnfReward = _getRewardBNN(lastRewardBlock, block.number);
-            accTokenPerShare = accTokenPerShare.add(bnnfReward.mul(PRECISION_FACTOR).div(stakedTokenSupply));
+            uint256 multiplier = _getMultiplier(lastRewardBlock, block.number);
+            uint256 xbxReward = multiplier.mul(rewardPerBlock);
+            accTokenPerShare = accTokenPerShare.add(xbxReward.mul(PRECISION_FACTOR).div(stakedTokenSupply));
         }
 
         lastRewardBlock = block.number;
+    }
+
+    /*
+     * @notice Return reward multiplier over the given _from to _to block.
+     * @param _from: block to start
+     * @param _to: block to finish
+     */
+    function _getMultiplier(uint256 _from, uint256 _to) internal view returns (uint256) {
+        if (_to <= bonusEndBlock) {
+            return _to.sub(_from);
+        } else if (_from >= bonusEndBlock) {
+            return 0;
+        } else {
+            return bonusEndBlock.sub(_from);
+        }
     }
     
     function getLockStakeDate() external view returns (uint256) {
@@ -544,59 +555,6 @@ contract BananaPool is Ownable, ReentrancyGuard {
     }
     
     function getLockWithdrawDate() external view returns (uint256) {
-        UserInfo storage user = userInfo[msg.sender];
-        return user.withdrawDate + lockWithdrawDate;
-    }
-    
-    /*
-     * @notice View function to get bnn reward on frontend.
-     * @param _from: from address
-     * @param _to: to address
-     * @return bnn reward
-     */
-    function _getRewardBNN(uint256 _from, uint256 _to) internal view returns (uint256) {
-        if (_to <= bonusEndBlock) {
-            uint256 fromMonth = (_from - startBlock) / blocksPerMonth;
-            uint256 toMonth = (_to - startBlock) / blocksPerMonth;
-            
-            if (fromMonth == toMonth) {
-                return rewardPerMonth[fromMonth] * _to.sub(_from);
-            }
-            
-            uint256 reward = 0;
-            for(uint256 i = fromMonth; i <= toMonth; i++) {
-                if (i == fromMonth) {
-                    reward += rewardPerMonth[i % 12] *(blocksPerMonth - _from);
-                } else if (i != toMonth) {
-                    reward += rewardPerMonth[i % 12] * blocksPerMonth;
-                } else {
-                    reward += rewardPerMonth[i % 12] * (_to - startBlock - blocksPerMonth * (i - 1));
-                }
-            }
-            
-            return reward;
-        } else if (_from >= bonusEndBlock) {
-            return 0;
-        } else {
-            _to = bonusEndBlock;
-            uint256 fromMonth = (_from - startBlock) / blocksPerMonth;
-            uint256 toMonth = (_to - startBlock) / blocksPerMonth;
-            
-            if (fromMonth == toMonth) {
-                return rewardPerMonth[fromMonth] * _to.sub(_from);
-            }
-            
-            uint256 reward = 0;
-            for(uint256 i = fromMonth; i <= toMonth; i++) {
-                if (i == fromMonth) {
-                    reward += rewardPerMonth[i % 12] *(blocksPerMonth - _from);
-                } else if (i != toMonth) {
-                    reward += rewardPerMonth[i % 12] * blocksPerMonth;
-                } else {
-                    reward += rewardPerMonth[i % 12] * (_to - startBlock - blocksPerMonth * (i - 1));
-                }
-            }
-            return reward;
-        }
+        return lockWithdrawDate;
     }
 }
