@@ -203,7 +203,7 @@ library SafeERC20 {
     }
 }
 
-contract BananaPool is Ownable, ReentrancyGuard {
+contract XBXPool is Ownable, ReentrancyGuard {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
@@ -345,7 +345,7 @@ contract BananaPool is Ownable, ReentrancyGuard {
         }
         
         if (lockStakeDate != 0 && _amount > 0) {
-            require(block.timestamp < lockStakeDate, 'BANANA: stake locked');
+            require(block.timestamp < lockStakeDate, 'XBX: stake locked');
         }
 
         _updatePool();
@@ -376,7 +376,7 @@ contract BananaPool is Ownable, ReentrancyGuard {
     function withdraw(uint256 _amount) external nonReentrant {
         UserInfo storage user = userInfo[msg.sender];
         require(user.amount >= _amount, 'Amount to withdraw too high');
-        require(block.timestamp >= lockWithdrawDate, 'BANANA: Withdraw was locked');
+        require(block.timestamp >= lockWithdrawDate, 'XBX: Withdraw was locked');
 
         _updatePool();
 
